@@ -27,6 +27,7 @@ export function initUsermodel(sequelize:Sequelize):typeof User{
     },
     age:{
         type:DataTypes.INTEGER,
+        allowNull:false
     },
     subjectId:{
         type:DataTypes.INTEGER,

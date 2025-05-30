@@ -2,49 +2,43 @@
 import { SubjectAttributes, UserAttributes } from '../dto/userdto'
 import db from '../models/index'
 import { Request, Response } from 'express'
-import { Subject } from '../models/subject'
 import {Parser} from 'json2csv'
 import path from 'path'
 import fs from 'fs'
+import { UserService } from '../services/userServices'
+const userService=new UserService()
 const { User } = db
 const createUser = async (req: Request, res: Response): Promise<void> => {
   try {
     const { name, age,subjectId } = req.body as UserAttributes
-    if (!name || !age || !subjectId) {
-      res.json('all fields required')
-      return
-    }
-    const createdUser: UserAttributes = await User.create({ name, age, subjectId })
-    createdUser.id
-    res.status(201).json('user created')
+   const user= await userService.createsUser({name,age,subjectId})
+    res.status(201).send({message:'User Created'})
   } catch (err: any) {
-    res.json(err.message)
+    res.json({message:err.message})
   }
 }
 const getUsers = async (req: Request, res: Response): Promise<void> => {
-  try {
-    const allusers: UserAttributes[] = await User.findAll();
-    if (allusers.length > 0) res.json(allusers)
-    else res.json('no users found')
-  } catch (err: any) {
-    res.json(err.message)
+  try{
+    const userList:UserAttributes[]=await userService.getUserList()
+    if(userList.length==0){
+      res.status(400).json({message:'No Users found'})
+      return
+    }
+    res.status(200).send(userList)
+  }catch(err:any){
+    res.status(500).json({message:err.message})
   }
 }
 const updateuser = async (req: Request, res: Response): Promise<void> => {
   try {
     const id = Number(req.params.id)
-    const { name, age, subjectId }: UserAttributes = req.body
-    if (!name || !age || !subjectId) {
-      res.json('all fields required')
+    const { name, age, subjectId } = req.body as UserAttributes
+    const updatedUser=await userService.updatesUser({name,age,subjectId},id)
+    if(!updatedUser){
+      res.status(404).json({message:'User Not found'})
       return
     }
-    const isvaliduser: UserAttributes | null = await User.findOne({ where: { id: id } })
-    if (!isvaliduser) {
-      res.status(404).json('user not found')
-      return
-    }
-      await User.update({ name, age, subjectId }, { where: { id:id} })
-    res.json('user updated')
+    res.status(200).send({message:'User updated'})
   } catch (err: any) {
     res.json(err.message)
   }
@@ -52,13 +46,12 @@ const updateuser = async (req: Request, res: Response): Promise<void> => {
 const deleteuser = async (req: Request, res: Response):Promise<void> => {
   try {
     const id = Number(req.params.id)
-    const isvaliduser: UserAttributes | null = await User.findByPk(id)
-    if (!isvaliduser) {
-      res.status(404).json('no user found')
+    const deletedUser= await userService.deleteUser(id)
+    if(!deletedUser){
+      res.status(404).json({message:'User Not found'})
       return
     }
-     await User.destroy({ where: { id: id } })
-    res.json('user deleted')
+    res.status(200).send({message:'user deleted'})
   } catch (err:any) {
     res.json(err.message)
   }
@@ -66,12 +59,13 @@ const deleteuser = async (req: Request, res: Response):Promise<void> => {
 const getuserbyid = async (req: Request, res: Response): Promise<void> => {
 
   try {
-    const id = Number(req.params.id)
-    const user: UserAttributes | null = await User.findByPk(id)
-    if (!user) {
-      res.status(404).json('user not available')
+    const {id}=req.params
+    const user:UserAttributes|null=await userService.getUserById(Number(id))
+    if(!user){
+      res.status(404).json({message:'User Not found'})
+      return
     }
-    res.status(200).json(user as UserAttributes)
+    res.status(500).json(user)
   } catch (err: any) {
     res.status(500).json(err.message)
   }
@@ -79,12 +73,13 @@ const getuserbyid = async (req: Request, res: Response): Promise<void> => {
   const getusersbysubject=async(req:Request,res:Response):Promise<void>=>{
     try{
       const id=Number(req.params.id)
-      const subject=await Subject.findByPk(id,{
-        include:[
-          {model:User,required:true,attributes:['name','age']}
-        ]
-      })
-      res.json(subject)
+      const users= await userService.getUsersBySubject(id)
+      if(!users){
+        res.status(400).json('user or subject id not found')
+        return
+      }
+      users.Users[0].age
+      res.status(200).json(users)
     }catch(err:any){
       res.json(err.message)
     }
@@ -101,11 +96,24 @@ const getuserbyid = async (req: Request, res: Response): Promise<void> => {
       console.log(csv)
       const filepath=path.join(__dirname,'../exports/students.csv')
       fs.writeFileSync(filepath,csv)
-      res.download(filepath,'students.csv',(err)=>{
-        res.status(500).json(err.message)
-      })
+      res.send("exported")
     }catch(error:any){
       res.status(500).json(error.message)
     }
   }
-export { createUser, getUsers, updateuser, deleteuser, getuserbyid, getusersbysubject,exportstudent }
+  const bulkinsertfromcsv=async(req:Request,res:Response)=>{
+  try{
+      const userdata: UserAttributes[] = req.body.data;
+  const cleaneddata = userdata.map((user: UserAttributes) => ({
+  ...user,
+  age: Number(user.age)
+}));
+await User.bulkCreate(cleaneddata);
+res.json(cleaneddata);
+      await User.bulkCreate(userdata)
+      res.json(userdata)
+  }catch(err:any){
+    res.json(err.message)
+  }
+  }
+export { createUser, getUsers, updateuser, deleteuser, getuserbyid, getusersbysubject,exportstudent,bulkinsertfromcsv }
