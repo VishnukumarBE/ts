@@ -23,7 +23,17 @@ const sendmail=async(req:Request,res:Response)=>{
                      res.status(400).json('provide a valid template')
                      return
               }
-              const htmlcontent=mailTemplate.content.replace('{{name}}',data.name)
+              let htmlcontent;
+              if(mailTemplate.type=='Welcome'){
+                      htmlcontent=mailTemplate.content.replace('{{name}}',data.name)
+              }
+              if(mailTemplate.type=='ResetPassword'){
+                     const resetLink = 'https://example.com/reset-password?token=123abcDEF456'
+                     htmlcontent = mailTemplate.content.replace('{{link}}', resetLink);
+              }
+              if(mailTemplate.type=='Invoice'){
+                       htmlcontent=mailTemplate.content
+              }
               console.log(htmlcontent)
              await transport.sendMail({
                     from : process.env.MAIL,

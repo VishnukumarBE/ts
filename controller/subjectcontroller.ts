@@ -47,7 +47,7 @@ const htmltopdf=async(req:Request,res:Response):Promise<void>=>{
     fs.unlinkSync(filepath)
     const pdffile:string=`${filepath}.pdf`
     fs.writeFileSync(pdffile,pdfBuffer)
-    res.end(pdfBuffer);
+    res.download(pdffile);
  }catch(err:any){
   res.status(500).json(err.message)
  }

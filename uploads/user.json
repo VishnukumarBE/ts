@@ -1,0 +1,82 @@
+[
+  {
+    "id": 1,
+    "name": "Meenakshi",
+    "age": 21,
+    "subjectId": 1,
+    "createdAt": "2025-05-26T05:26:15.000Z",
+    "updatedAt": "2025-05-26T05:26:15.000Z"
+  },
+  {
+    "id": 2,
+    "name": "Vishnukumar",
+    "age": 21,
+    "subjectId": 1,
+    "createdAt": "2025-05-26T05:26:27.000Z",
+    "updatedAt": "2025-05-29T10:50:18.000Z"
+  },
+  {
+    "id": 3,
+    "name": "Bala",
+    "age": 23,
+    "subjectId": 2,
+    "createdAt": "2025-05-26T05:26:37.000Z",
+    "updatedAt": "2025-05-26T05:26:37.000Z"
+  },
+  {
+    "id": 4,
+    "name": "Velu",
+    "age": 23,
+    "subjectId": 2,
+    "createdAt": "2025-05-26T05:26:44.000Z",
+    "updatedAt": "2025-05-26T05:26:44.000Z"
+  },
+  {
+    "id": 40,
+    "name": "Alice",
+    "age": 25,
+    "subjectId": 1,
+    "createdAt": "2025-05-30T08:22:04.000Z",
+    "updatedAt": "2025-05-30T08:22:04.000Z"
+  },
+  {
+    "id": 41,
+    "name": "Bob",
+    "age": 30,
+    "subjectId": 2,
+    "createdAt": "2025-05-30T08:22:04.000Z",
+    "updatedAt": "2025-05-30T08:22:04.000Z"
+  },
+  {
+    "id": 42,
+    "name": "Charlie",
+    "age": 22,
+    "subjectId": 2,
+    "createdAt": "2025-05-30T08:22:04.000Z",
+    "updatedAt": "2025-05-30T08:22:04.000Z"
+  },
+  {
+    "id": 43,
+    "name": "David",
+    "age": 28,
+    "subjectId": 2,
+    "createdAt": "2025-05-30T08:22:04.000Z",
+    "updatedAt": "2025-05-30T08:22:04.000Z"
+  },
+  {
+    "id": 44,
+    "name": "Eva",
+    "age": 26,
+    "subjectId": 1,
+    "createdAt": "2025-05-30T08:22:04.000Z",
+    "updatedAt": "2025-05-30T08:22:04.000Z"
+  },
+  {
+    "id": 45,
+    "name": "Vinith",
+    "age": 20,
+    "subjectId": 2,
+    "createdAt": "2025-05-30T11:29:41.000Z",
+    "updatedAt": "2025-05-30T11:29:41.000Z"
+  }
+]

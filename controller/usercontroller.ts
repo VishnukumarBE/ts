@@ -5,14 +5,16 @@ import { Request, Response } from 'express'
 import {Parser} from 'json2csv'
 import path from 'path'
 import fs from 'fs'
+import { customrequest } from '../dto/userdto'
 import { UserService } from '../services/userServices'
+import cron from 'node-cron'
 const userService=new UserService()
 const { User } = db
 const createUser = async (req: Request, res: Response): Promise<void> => {
   try {
     const { name, age,subjectId } = req.body as UserAttributes
    const user= await userService.createsUser({name,age,subjectId})
-    res.status(201).send({message:'User Created'})
+    res.status(201).send({message:'User Created '})
   } catch (err: any) {
     res.json({message:err.message})
   }
@@ -24,9 +26,9 @@ const getUsers = async (req: Request, res: Response): Promise<void> => {
       res.status(400).json({message:'No Users found'})
       return
     }
-    res.status(200).send(userList)
+    res.status(200).send({message:userList,heart:'❤️'})
   }catch(err:any){
-    res.status(500).json({message:err.message})
+    res.status(500).json({message:err.message })
   }
 }
 const updateuser = async (req: Request, res: Response): Promise<void> => {
@@ -70,7 +72,7 @@ const getuserbyid = async (req: Request, res: Response): Promise<void> => {
     res.status(500).json(err.message)
   }
 }
-  const getusersbysubject=async(req:Request,res:Response):Promise<void>=>{
+const getusersbysubject=async(req:Request,res:Response):Promise<void>=>{
     try{
       const id=Number(req.params.id)
       const users= await userService.getUsersBySubject(id)
@@ -78,14 +80,14 @@ const getuserbyid = async (req: Request, res: Response): Promise<void> => {
         res.status(400).json('user or subject id not found')
         return
       }
-      users.Users[0].age
       res.status(200).json(users)
     }catch(err:any){
       res.json(err.message)
     }
-  }
+}
   const exportstudent=async(req:Request,res:Response):Promise<void>=>{
     try{
+      console.log((req as any).user)
       const users:UserAttributes[]= await User.findAll({raw:true,attributes:['id','name','age']})
       console.log(users)
       const format:string[]=[
@@ -96,24 +98,56 @@ const getuserbyid = async (req: Request, res: Response): Promise<void> => {
       console.log(csv)
       const filepath=path.join(__dirname,'../exports/students.csv')
       fs.writeFileSync(filepath,csv)
-      res.send("exported")
+      res.download(filepath)
     }catch(error:any){
       res.status(500).json(error.message)
     }
   }
   const bulkinsertfromcsv=async(req:Request,res:Response)=>{
   try{
-      const userdata: UserAttributes[] = req.body.data;
-  const cleaneddata = userdata.map((user: UserAttributes) => ({
-  ...user,
-  age: Number(user.age)
-}));
-await User.bulkCreate(cleaneddata);
-res.json(cleaneddata);
-      await User.bulkCreate(userdata)
+      const userdata = req.body.data;
+      console.log(userdata)
+      await User.bulkCreate(userdata.data);
       res.json(userdata)
   }catch(err:any){
-    res.json(err.message)
+    res.status(500).json(err.message)
   }
   }
-export { createUser, getUsers, updateuser, deleteuser, getuserbyid, getusersbysubject,exportstudent,bulkinsertfromcsv }
+  const getUserByLimits=async(req:Request,res:Response)=>{
+    try{
+      const page=Number(req.query.page)||1
+      const limit=Number(req.query.limit)||3
+      const users=await userService.getUsersByPagination(page,limit)
+      if(users.rows.length==0){
+        res.end('no users found')
+      }
+      res.status(200).json({Totalpages:Math.ceil(users.count/limit),users:users.rows})
+    }catch(err:any){
+      res.status(500).json(err.message)
+    }
+  }
+  const generateToken=async(req:customrequest,res:Response)=>{
+    try{
+        res.status(200).send(req.data)
+    }catch(err:any){
+          res.status(500).send(err.message)
+    }
+  }
+ cron.schedule('0 0 * * 5', async () => {
+  try {
+    const users = await userService.getUserList();
+    const plainUsers = users.map((user: any) => user.toJSON());
+    const uploadDir = path.join(__dirname, '../uploads');
+    if (!fs.existsSync(uploadDir)) {
+      fs.mkdirSync(uploadDir);
+    }
+    const filePath = path.join(uploadDir, 'user.json');
+    fs.writeFileSync(filePath, JSON.stringify(plainUsers, null, 2));
+
+    console.log('✅ Weekly user backup successful ');
+  } catch (err: any) {
+    console.error('❌ Failed to backup users:', err.message);
+  }
+});
+export { createUser, getUsers, updateuser, deleteuser, getuserbyid, getusersbysubject
+  ,exportstudent,bulkinsertfromcsv,getUserByLimits,generateToken }

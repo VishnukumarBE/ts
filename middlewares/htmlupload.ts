@@ -1,7 +1,6 @@
 import multer,{FileFilterCallback} from 'multer'
 import { Request } from 'express'
 import path from 'path'
-
 const storage=multer.diskStorage({
     destination:function(req:Request,file:Express.Multer.File,cb){
          cb(null, path.join(__dirname, '../uploads'));
@@ -11,7 +10,6 @@ const storage=multer.diskStorage({
         cb(null,name)
     }
 })
-
 const fileFilter=(req:Request,file:Express.Multer.File,cb:FileFilterCallback)=>{
        const allowedtype=/html/
        const ext=path.extname(file.originalname).toLowerCase()
@@ -21,6 +19,5 @@ const fileFilter=(req:Request,file:Express.Multer.File,cb:FileFilterCallback)=>{
         cb(new Error('only html files are allowed'))
        }
 }
-
 const htmlUpload=multer({storage,fileFilter})
 export default htmlUpload   

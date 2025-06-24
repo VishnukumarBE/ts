@@ -1,3 +1,4 @@
+import { Request } from "express";
 export interface UserAttributes {
      id?: number;
      name: string,
@@ -38,4 +39,11 @@ export interface UsersBySubject{
           name:string,
           age:number
      }[]
+}
+export  interface IdNameValidator{
+        id:number,
+        name:string
+}
+export interface customrequest extends Request{
+    data?:string
 }

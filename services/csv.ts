@@ -5,7 +5,6 @@ const readCsv=(filepath:string):Promise<string[]>=>{
        return new Promise((resolve,reject)=>{
            const result:string[]=[]
           fs.createReadStream(filepath).pipe(csv()).on('data',(data)=>{
-            data.age=parseInt(data.age)
             return result.push(data)
           }).on('end',()=>{
             console.log('csv readed successffully')

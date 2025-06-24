@@ -4,8 +4,8 @@ const {User,Subject}=db
 export class UserService{
       async getUserList(){
         try{
-            const UserList:UserAttributes[]=await User.findAll()
-            return UserList
+            const UsersList:UserAttributes[]=await User.findAll()
+            return UsersList
         }catch(err:any){
             throw new Error('UserService has thrown error: '+err.message)
         }
@@ -57,5 +57,17 @@ export class UserService{
        }catch(err:any){
           throw new Error('UserService has thrown error: '+err.message)
        }
+      }
+      async getUsersByPagination(page:number,limit:number){
+        try{
+          const offset =(page-1)*limit
+          const users=await User.findAndCountAll({
+                 limit,
+                 offset
+          })
+          return users
+        }catch(err:any){
+          throw new Error('UserService has thrown error: '+err.message)
+        }
       }
 }

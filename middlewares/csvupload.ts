@@ -2,7 +2,6 @@ import multer,{FileFilterCallback} from 'multer'
 import { NextFunction, Request,Response } from 'express'
 import path from 'path'
 import readCsv from '../services/csv'
-
 const storage=multer.diskStorage({
     destination:function(req:Request,file:Express.Multer.File,cb){
          cb(null, path.join(__dirname, '../uploads'));
@@ -12,7 +11,6 @@ const storage=multer.diskStorage({
         cb(null,name)
     }
 })
-
 const fileFilter=(req:Request,file:Express.Multer.File,cb:FileFilterCallback)=>{
        const allowedtype=/csv/
        const ext=path.extname(file.originalname).toLowerCase()
@@ -34,7 +32,6 @@ const getcsv=async(req:Request,res:Response,next:NextFunction):Promise<void>=>{
        console.log(filepath)
        const csvdata=await readCsv(filepath)
        req.body.data=csvdata
-       console.log(csvdata)
        next()
       }catch(err){
         next(err)
